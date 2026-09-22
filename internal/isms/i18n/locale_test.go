@@ -79,6 +79,8 @@ func TestCanonical(t *testing.T) {
 		{"unsupported region falls back to same language", "id-SG", "id-ID", true},
 		{"bare language de", "de", "de-DE", true},
 		{"unsupported region falls back to de-DE", "de-AT", "de-DE", true},
+		{"bare language es", "es", "es-ES", true},
+		{"unsupported region falls back to es-ES", "es-MX", "es-ES", true},
 		{"bare language fr", "fr", "fr-FR", true},
 		{"unsupported region falls back to fr-FR", "fr-CA", "fr-FR", true},
 		{"bare language is", "is", "is-IS", true},
@@ -274,6 +276,7 @@ func TestOnlyEnabledLocalesAreOffered(t *testing.T) {
 	want := []Locale{
 		{Tag: "en", Name: "English"},
 		{Tag: "de-DE", Name: "Deutsch"},
+		{Tag: "es-ES", Name: "Español"},
 		{Tag: "fr-FR", Name: "Français"},
 		{Tag: "id-ID", Name: "Bahasa Indonesia"},
 		{Tag: "is-IS", Name: "Íslenska"},
