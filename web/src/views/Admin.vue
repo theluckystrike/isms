@@ -552,8 +552,8 @@
               <div v-for="s in group" :key="s.key" class="px-5 py-4">
                 <div class="flex items-start justify-between gap-4 mb-3">
                   <div class="flex-1 min-w-0">
-                    <label class="block text-sm font-medium text-slate-200">{{ humanSettingLabel(s.key) }}</label>
-                    <div v-if="s.description" class="text-xs text-slate-500 mt-0.5">{{ s.description }}</div>
+                    <label class="block text-sm font-medium text-slate-200">{{ settingLabel(s) }}</label>
+                    <div v-if="settingDescription(s)" class="text-xs text-slate-500 mt-0.5">{{ settingDescription(s) }}</div>
                   </div>
                   <button @click="saveSetting(s)" :disabled="s._saving"
                     class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg transition-colors disabled:opacity-50 whitespace-nowrap flex-shrink-0">
@@ -783,6 +783,7 @@ import { slugifyCategory } from '../riskCategories'
 import { slugifyFieldKey } from '../customFields'
 import { ref, computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { FALLBACK } from '../i18n.js'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../api.js'
 import { useSession } from '../composables/useSession'
@@ -792,7 +793,7 @@ import { formatDate } from '../composables/useFormat.js'
 import { enumLabel } from '../composables/useEnumLabel.js'
 import { renderApiError } from '../composables/useApiError.js'
 
-const { t } = useI18n()
+const { t, te } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const { orgSlug, orgPath } = useCurrentOrg()
@@ -1285,8 +1286,24 @@ function settingType(s) {
   return 'text'
 }
 
+// De-slug of last resort, for a setting the catalogue has no label for yet.
 function humanSettingLabel(key) {
   return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+}
+
+// Per-setting copy lives in admin.settings.label.* / admin.settings.description.*,
+// keyed by the setting key. te() checks one locale only, so probe the fallback
+// catalogue (complete by contract), same as enumLabel: a locale that lags behind
+// renders English through fallbackLocale. A setting added without copy degrades
+// to the de-slugged key and the server's stored (English) description.
+function settingLabel(s) {
+  const key = `admin.settings.label.${s.key}`
+  return te(key, FALLBACK) ? t(key) : humanSettingLabel(s.key)
+}
+
+function settingDescription(s) {
+  const key = `admin.settings.description.${s.key}`
+  return te(key, FALLBACK) ? t(key) : (s.description || '')
 }
 
 async function saveSetting(s) {
@@ -1294,7 +1311,7 @@ async function saveSetting(s) {
   settingsMsg.value = ''
   try {
     await api.putJSON('/api/v1/admin/settings', { key: s.key, value: s.value })
-    settingsMsg.value = t('admin.settings.saved', { key: s.key })
+    settingsMsg.value = t('admin.settings.saved', { key: settingLabel(s) })
     settingsError.value = false
   } catch (e) {
     settingsMsg.value = renderApiError(e)
