@@ -1314,11 +1314,18 @@ paths:
                       type: object
                       properties:
                         id: { type: integer }
+                        organization_id: { type: integer }
                         review_id: { type: integer }
                         reviewer: { type: string }
                         status: { type: string }
-                        responded_at: { type: string, format: date-time }
-                        reviewed_at: { type: string, format: date-time }
+                        reviewed_at:
+                          type: integer
+                          format: int64
+                          description: Unix epoch seconds. Omitted while the assignment is still pending.
+                        created_at:
+                          type: integer
+                          format: int64
+                          description: Unix epoch seconds.
                         is_agent: { type: boolean }
 
   /reviews/{id}/status:
