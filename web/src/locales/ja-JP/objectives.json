@@ -10,13 +10,13 @@
   },
   "filter": {
     "all_programs": "すべてのプログラム",
-    "owner_placeholder": "責任者...",
+    "owner_placeholder": "責任者…",
     "empty": "目標は見つかりません"
   },
   "create": {
     "heading": "目標を追加",
     "program_label": "プログラム *",
-    "program_placeholder": "プログラムを選択...",
+    "program_placeholder": "プログラムを選択…",
     "owner_label": "責任者",
     "title_label": "タイトル *",
     "title_placeholder": "毎月のフィッシングテスト完了率",
@@ -53,11 +53,11 @@
   },
   "placeholder": {
     "description": "この目標は何ですか？",
-    "owner": "責任者を選択...",
+    "owner": "責任者を選択…",
     "source": "ISO 27001 6.2 など",
     "measurement_method": "どのように測定しますか？",
-    "unit": "%、件数、時間...",
-    "notes": "メモを追加..."
+    "unit": "%、件数、時間…",
+    "notes": "メモを追加…"
   },
   "detail": {
     "overview": "概要",
@@ -76,7 +76,7 @@
       "fail": "不合格"
     },
     "message_label": "内部メモ",
-    "message_placeholder": "内部の文脈...",
+    "message_placeholder": "内部の文脈…",
     "public_note_placeholder": "公開メモ（ステークホルダーに表示）",
     "submit": "記録",
     "empty": "まだチェックインは記録されていません",

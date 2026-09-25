@@ -28,11 +28,11 @@
     "body": "{doc_id} のAIレビューが合意なしにラウンド {round} に達しました。確認して判断してください。"
   },
   "ca_assigned": {
-    "title": "是正措置が割り当てられました: {title}"
+    "title": "是正処置が割り当てられました: {title}"
   },
   "ca_resolved": {
-    "title": "是正措置が解決されました: {title}",
-    "body": "是正措置 #{id} が {actor} によって解決されました"
+    "title": "是正処置が解決されました: {title}",
+    "body": "是正処置 #{id} が {actor} によって解決されました"
   },
   "suggestion_new": {
     "title": "新しい提案",

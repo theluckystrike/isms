@@ -43,11 +43,11 @@
     "external_id": "外部ID"
   },
   "placeholder": {
-    "description": "インシデントの内容を記入...",
-    "root_cause": "根本原因の分析...",
+    "description": "インシデントの内容を記入…",
+    "root_cause": "根本原因の分析…",
     "lessons_learned": "改善できる点は？",
-    "assignee": "担当者を選択...",
-    "notes": "メモを追加..."
+    "assignee": "担当者を選択…",
+    "notes": "メモを追加…"
   },
   "classification": {
     "confidentiality": "機密性",
@@ -70,8 +70,8 @@
     "closed": "クローズ:"
   },
   "actions": {
-    "create_ca": "是正措置を作成",
-    "create_ca_desc": "このインシデントにリンクした是正措置を作成します。"
+    "create_ca": "是正処置を作成",
+    "create_ca_desc": "このインシデントにリンクした是正処置を作成します。"
   },
   "breach": {
     "heading": "個人データ漏えい（GDPR）",

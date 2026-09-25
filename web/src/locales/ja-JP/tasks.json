@@ -12,12 +12,12 @@
   "create": {
     "heading": "タスクを追加",
     "title_label": "タイトル",
-    "title_placeholder": "例: リスク台帳をレビュー",
+    "title_placeholder": "例：リスク台帳をレビュー",
     "priority_label": "優先度",
     "type_label": "タイプ",
     "visibility_label": "可視性",
     "fill_in_later": "説明、担当者、期限、メモは作成後に追加できます。",
-    "submitting": "作成中...",
+    "submitting": "作成中…",
     "submit": "追加"
   },
   "visibility": {
@@ -49,9 +49,9 @@
     "completed": "完了"
   },
   "placeholder": {
-    "description": "タスクを説明してください...",
-    "assignee": "担当者を選択...",
-    "notes": "メモを追加..."
+    "description": "タスクを説明してください…",
+    "assignee": "担当者を選択…",
+    "notes": "メモを追加…"
   },
   "detail": {
     "overview": "概要",
@@ -64,6 +64,6 @@
   "danger": {
     "warning": "このタスクの削除は永続的で元に戻せません。",
     "delete": "タスクを削除",
-    "confirm": "タスク \"{title}\" を削除しますか？"
+    "confirm": "タスク「{title}」を削除しますか？"
   }
 }

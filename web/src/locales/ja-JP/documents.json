@@ -19,7 +19,7 @@
   "dash": {
     "tab": {
       "review": "レビューが必要",
-      "recent": "最近変更された",
+      "recent": "最近の変更",
       "search": "検索",
       "templates": "テンプレート"
     }
@@ -93,10 +93,10 @@
     "author": "作成者",
     "author_placeholder": "作成者を設定…",
     "version": "バージョン",
-    "owner": "所有者",
+    "owner": "責任者",
     "not_set": "未設定",
     "review_cycle": "レビュー周期",
-    "review_cycle_months": "毎月 {count} 回 | 毎月 {count} 回",
+    "review_cycle_months": "{count} か月ごと | {count} か月ごと",
     "last_approved": "最終承認日",
     "approved_version": "承認済みバージョン",
     "next_review": "次回レビュー",
@@ -105,7 +105,7 @@
   "banner": {
     "round_complete": "ラウンド {round} 完了 — 変更が要求されました",
     "pending_suggestions": "対応すべき提案が {count} 件あります。 | 対応すべき提案が {count} 件あります。",
-    "feedback_waiting": "レビューアーのフィードバックが会話で待っています。",
+    "feedback_waiting": "レビュー担当者のフィードバックが会話で待っています。",
     "then_resubmit": "フィードバックに対応してから、次のラウンドに再提出してください。",
     "open_review": "レビューを開く",
     "in_review": "この文書はレビュー中です。",
@@ -142,7 +142,7 @@
     "resolved": "解決済み",
     "resolved_by": "{name} が {date} に解決",
     "resolved_by_unknown": "不明",
-    "inline_placeholder": "この段落にコメントを追加…（@ を入力してメンション）",
+    "inline_placeholder": "この段落にコメントを追加…（{'@'} を入力してメンション）",
     "no_users": "ユーザーが見つかりません",
     "empty": "この文書のコンテンツはありません。"
   },
@@ -150,7 +150,7 @@
     "no_document": "コメントを表示する文書を選択してください",
     "heading": "コメント",
     "resolved_count": "{count} 件解決済み",
-    "general_placeholder": "一般的なコメントを追加…（@ を入力してメンション）",
+    "general_placeholder": "一般的なコメントを追加…（{'@'} を入力してメンション）",
     "author_placeholder": "あなたの名前",
     "send": "送信",
     "inline_label": "インラインコメント",
@@ -164,12 +164,12 @@
   },
   "review_modal": {
     "heading": "レビューに送信",
-    "reviewers": "レビューアー",
+    "reviewers": "レビュー担当者",
     "search_members": "メンバーを検索…",
     "version_note": "バージョンノート",
     "version_note_placeholder": "例：リスクアセスメント基準を更新。データ分類表を追加。",
     "version_note_hint": "これは承認後に文書の永続的なバージョン履歴の一部になります。",
-    "send": "{count} 人のレビューアーに送信 | {count} 人のレビューアーに送信"
+    "send": "{count} 人のレビュー担当者に送信 | {count} 人のレビュー担当者に送信"
   },
   "new_doc": {
     "heading": "新しい文書",
@@ -193,7 +193,7 @@
   },
   "confirm": {
     "embedded_html_body": "この文書にはエディターが保持できない埋め込みHTML/SVGが含まれています — ここで編集すると保存時に失われます。保持するにはCLIでソースを編集してください。それでも編集しますか？",
-    "delete_body": "\"{name}\" を削除しますか？この操作は元に戻せません。"
+    "delete_body": "「{name}」を削除しますか？この操作は元に戻せません。"
   },
   "error": {
     "load_diff": "差分の読み込みに失敗しました",

@@ -14,7 +14,7 @@
   "create": {
     "heading": "リスクを追加",
     "title_label": "タイトル *",
-    "title_placeholder": "例: 本番システムへのランサムウェア攻撃",
+    "title_placeholder": "例：本番システムへのランサムウェア攻撃",
     "category_label": "カテゴリ",
     "deselect_hint": "クリックして選択解除",
     "fill_in_later": "説明、影響、対応、責任者などは作成後に追加できます。",
@@ -66,9 +66,9 @@
     "external_id": "外部ID"
   },
   "placeholder": {
-    "description": "リスクを説明してください...",
+    "description": "リスクを説明してください…",
     "treatment_plan": "このリスクにどのように対応していますか？",
-    "notes": "メモ、観察事項、会議議事録、参照情報を追加..."
+    "notes": "メモ、観察事項、会議議事録、参照情報を追加…"
   },
   "detail": {
     "overview": "概要",

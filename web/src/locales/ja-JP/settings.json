@@ -4,7 +4,7 @@
     "title": "プロフィール",
     "email": "メール",
     "name": "名前",
-    "role": "ロール",
+    "role": "役割",
     "name_updated": "名前を更新しました"
   },
   "password": {
@@ -52,7 +52,7 @@
     "title": "個人アクセストークン",
     "description": "トークンはCLIツールとAIエージェントを認証します。すべての組織で機能します。",
     "name": "トークン名",
-    "name_placeholder": "例: claude-agent",
+    "name_placeholder": "例：claude-agent",
     "permissions": "権限",
     "creating": "作成中…",
     "create": "トークンを作成",
@@ -63,7 +63,7 @@
     "last_used": "最終使用 {date}",
     "never_used": "未使用",
     "revoke": "失効",
-    "revoke_confirm": "トークン \"{name}\" を失効させますか？",
+    "revoke_confirm": "トークン「{name}」を失効させますか？",
     "revoked_message": "トークンを失効させました",
     "empty": "トークンはまだありません。"
   },

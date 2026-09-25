@@ -13,7 +13,7 @@
   "create": {
     "heading": "システムを追加",
     "name_label": "名前 *",
-    "name_placeholder": "例: 本番ERP",
+    "name_placeholder": "例：本番ERP",
     "classification_label": "分類",
     "criticality_label": "重要度",
     "supplier_label": "サプライヤー",
@@ -66,9 +66,9 @@
     "rto": "許容される最大ダウンタイム（時間）"
   },
   "placeholder": {
-    "description": "システムを説明してください...",
-    "department": "IT、エンジニアリング、マーケティング...",
-    "notes": "追加メモ... 文書をリンクするには /doc と入力"
+    "description": "システムを説明してください…",
+    "department": "IT、エンジニアリング、マーケティング…",
+    "notes": "追加メモ… 文書をリンクするには /doc と入力"
   },
   "detail": {
     "overview": "概要",
@@ -88,7 +88,7 @@
     "users_added": "追加されたユーザー",
     "users_removed": "削除されたユーザー",
     "notes_label": "メモ",
-    "notes_placeholder": "退職した元従業員を削除...",
+    "notes_placeholder": "退職した元従業員を削除…",
     "submit": "レビューを記録",
     "reviewed_by": "{name} {reviewed}",
     "reviewed": "レビュー済み",

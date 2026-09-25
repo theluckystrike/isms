@@ -15,11 +15,11 @@
     "objectives": "目標",
     "programs": "プログラム",
     "audit": "監査",
-    "corrective_actions": "是正措置",
+    "corrective_actions": "是正処置",
     "incidents": "インシデント",
     "changes": "変更管理",
     "tasks": "タスク",
-    "admin": "管理者"
+    "admin": "管理"
   },
   "sidebar": {
     "expand": "サイドバーを展開",

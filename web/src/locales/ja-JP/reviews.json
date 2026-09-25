@@ -49,7 +49,7 @@
     "summary_heading": "このレビューでの変更",
     "never_approved_inline": "全量レビュー — この文書は承認されたことがありません。文書タブで全文を確認してください。",
     "none_inline": "差分がありません — レビューベース以降に文書が変更されていない可能性があります。",
-    "loading": "変更を読み込み中...",
+    "loading": "変更を読み込み中…",
     "scope_round": "このラウンドでの変更",
     "scope_all": "レビュー内のすべての変更",
     "mode_split": "分割",
@@ -60,7 +60,7 @@
   },
   "comment": {
     "heading": "コメントを追加",
-    "placeholder": "コメントを残す..."
+    "placeholder": "コメントを残す…"
   },
   "edit": {
     "save_and_resubmit": "保存して再提出",
@@ -96,7 +96,7 @@
   "policy": {
     "heading": "承認要件",
     "approvals": "{current}/{min} 承認",
-    "missing_roles": "不足: {roles} ロール",
+    "missing_roles": "不足: {roles} 役割",
     "missing_users": "待機中: {users}",
     "blocked": "すべての要件が満たされるまでマージはブロックされます",
     "will_auto_merge": "すべての承認が揃うと自動マージされます",
@@ -112,7 +112,7 @@
     "publish_note_this_version": "これによりこのバージョンが承認済み文書になります。",
     "awaiting_manager": "すべてのレビュー担当者が承認しました。マネージャーによる公開を待っています。",
     "revision_proposed_by": "{name} がこの文書への改訂を提案しました。",
-    "publishing": "公開中...",
+    "publishing": "公開中…",
     "accept_and_publish": "承認して公開",
     "request_another_review": "別のレビューを依頼",
     "propose_new_revision": "新しい改訂を提案",
@@ -129,12 +129,12 @@
     "request_changes": "変更を要求",
     "propose_revision": "改訂を提案",
     "approve_heading": "この文書を承認",
-    "approve_placeholder": "任意のコメント...",
-    "approving": "承認中...",
+    "approve_placeholder": "任意のコメント…",
+    "approving": "承認中…",
     "confirm_approve": "承認を確定",
     "changes_heading": "変更を要求",
-    "changes_placeholder": "変更が必要な内容を記入してください...（必須）",
-    "submitting": "送信中...",
+    "changes_placeholder": "変更が必要な内容を記入してください…（必須）",
+    "submitting": "送信中…",
     "submit_request": "リクエストを送信",
     "withdraw": "レビューを取り下げ",
     "close_without_merging": "マージせずにクローズ",
@@ -164,11 +164,11 @@
   "toast": {
     "revision_published": "改訂が承認され公開されました。",
     "revision_accepted": "提案された改訂を承認しました",
-    "decision_recorded": "承認が記録されました{round}。あと {count} 件のレビュー担当者を待っています。 | 承認が記録されました{round}。あと {count} 件のレビュー担当者を待っています。",
-    "decision_recorded_changes": "変更要求が記録されました{round}。あと {count} 件のレビュー担当者を待っています。 | 変更要求が記録されました{round}。あと {count} 件のレビュー担当者を待っています。",
+    "decision_recorded": "承認が記録されました{round}。あと {count} 人のレビュー担当者を待っています。 | 承認が記録されました{round}。あと {count} 人のレビュー担当者を待っています。",
+    "decision_recorded_changes": "変更要求が記録されました{round}。あと {count} 人のレビュー担当者を待っています。 | 変更要求が記録されました{round}。あと {count} 人のレビュー担当者を待っています。",
     "all_approved": "すべてのレビュー担当者が承認しました{round}。マージの準備ができています。",
     "changes_requested": "変更が要求されました{round}。作成者に通知されます。",
-    "for_round": " ラウンド {round} 用"
+    "for_round": "（ラウンド {round}）"
   },
   "confirm": {
     "approve_stale_title": "それでも承認",

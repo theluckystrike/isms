@@ -24,10 +24,10 @@
     "risks": "リスク",
     "incidents": "インシデント",
     "changes": "変更",
-    "corrective_actions": "是正措置",
+    "corrective_actions": "是正処置",
     "suppliers": "サプライヤー",
     "assets": "資産",
-    "legal": "法務",
+    "legal": "法規制",
     "systems": "システム",
     "alert": {
       "draft": "{count} 件の下書き",
@@ -68,8 +68,8 @@
       "detail": "{count} 件の変更が提案済み | {count} 件の変更が提案済み"
     },
     "corrective_actions": {
-      "title": "未処理の是正措置",
-      "detail": "{count} 件の是正措置が進行中 | {count} 件の是正措置が進行中"
+      "title": "未処理の是正処置",
+      "detail": "{count} 件の是正処置が進行中 | {count} 件の是正処置が進行中"
     }
   },
   "stats": {
@@ -81,7 +81,7 @@
     "risks_none": "すべて許容範囲内",
     "incidents": "インシデント",
     "incidents_detail": "未処理のインシデント",
-    "corrective_actions": "是正措置",
+    "corrective_actions": "是正処置",
     "corrective_actions_detail": "未処理の措置",
     "changes": "変更",
     "changes_detail": "承認待ち",
@@ -99,7 +99,7 @@
       "audit": "監査",
       "risk": "リスクレビュー",
       "supplier": "サプライヤーレビュー",
-      "legal": "法務レビュー",
+      "legal": "法規制レビュー",
       "task": "タスク"
     },
     "untitled_audit": "監査"

@@ -12,7 +12,7 @@
   "create": {
     "heading": "法規制要件を追加",
     "title_label": "タイトル *",
-    "title_placeholder": "例: GDPR、NIS2指令",
+    "title_placeholder": "例：GDPR、NIS2指令",
     "category_label": "カテゴリ",
     "deselect_hint": "クリックして選択解除",
     "fill_in_later": "管轄、責任者、対応策などは作成後に追加できます。",
@@ -52,12 +52,12 @@
     "external_id": "外部ID"
   },
   "placeholder": {
-    "description": "要件の内容を記入...",
-    "jurisdiction": "検索して入力...",
-    "reference": "例: 第32条、4.2節",
-    "url": "https://...",
-    "treatment_plan": "この要件にどう対応していますか？（管理策、ポリシー、アクション...）",
-    "notes": "追加メモ、所見、解釈... 文書をリンクするには /doc と入力"
+    "description": "要件の内容を記入…",
+    "jurisdiction": "検索して入力…",
+    "reference": "例：第32条、4.2節",
+    "url": "https://…",
+    "treatment_plan": "この要件にどう対応していますか？（管理策、ポリシー、アクション…）",
+    "notes": "追加メモ、所見、解釈… 文書をリンクするには /doc と入力"
   },
   "detail": {
     "overview": "概要",

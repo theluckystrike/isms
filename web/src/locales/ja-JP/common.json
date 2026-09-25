@@ -25,7 +25,7 @@
   },
   "state": {
     "loading": "読み込み中…",
-    "saving": "保存中...",
+    "saving": "保存中…",
     "empty": "まだ項目はありません",
     "error": "エラーが発生しました",
     "unknown": "不明",
@@ -36,8 +36,8 @@
     "saved": "保存しました",
     "overdue": "期限切れ",
     "no_notes": "メモはまだありません。",
-    "sending": "送信中...",
-    "creating": "作成中..."
+    "sending": "送信中…",
+    "creating": "作成中…"
   },
   "validation": {
     "required": "このフィールドは必須です"
@@ -52,7 +52,7 @@
     "incident": "インシデント",
     "legal_requirement": "法規制要件",
     "change_request": "変更要求",
-    "corrective_action": "是正措置",
+    "corrective_action": "是正処置",
     "objective": "目標",
     "task": "タスク",
     "system": "システム",
@@ -80,7 +80,7 @@
     "incident": "インシデント",
     "legal_requirement": "法規制要件",
     "change_request": "変更要求",
-    "corrective_action": "是正措置",
+    "corrective_action": "是正処置",
     "objective": "目標",
     "task": "タスク",
     "system": "システム",
@@ -128,10 +128,10 @@
       "open": "未処理",
       "in_review": "レビュー中",
       "approved": "承認済み",
-      "changes_requested": "変更が要求済み",
+      "changes_requested": "変更要求あり",
       "proposed_revision": "改訂案",
       "merged": "マージ済み",
-      "retired": "退役済み",
+      "retired": "廃止済み",
       "pending": "保留中",
       "accepted": "受容済み",
       "applied": "適用済み",
@@ -140,7 +140,7 @@
       "resolved": "解決済み",
       "closed": "クローズ済み",
       "investigating": "調査中",
-      "contained": "抑止済み",
+      "contained": "封じ込め済み",
       "todo": "未着手",
       "in_progress": "進行中",
       "done": "完了",
@@ -180,13 +180,13 @@
     "classification": {
       "public": "公開",
       "internal": "内部",
-      "confidential": "機密",
-      "restricted": "限定公開"
+      "confidential": "秘密",
+      "restricted": "極秘"
     },
     "role": {
       "admin": "管理者",
       "manager": "マネージャー",
-      "contributor": "寄稿者",
+      "contributor": "コントリビューター",
       "reader": "閲覧者"
     },
     "audit_result": {
@@ -332,7 +332,7 @@
       "review": "レビュー",
       "incident_followup": "インシデントフォローアップ",
       "audit_followup": "監査フォローアップ",
-      "ca_followup": "是正措置フォローアップ",
+      "ca_followup": "是正処置フォローアップ",
       "change_followup": "変更フォローアップ",
       "onboarding": "オンボーディング",
       "offboarding": "オフボーディング",
@@ -383,7 +383,7 @@
       "control": "管理策",
       "guideline": "ガイドライン",
       "record": "記録",
-      "clause": "条項",
+      "clause": "箇条",
       "requirement": "要件"
     }
   },
@@ -398,12 +398,12 @@
       "draft": "下書き",
       "open": "未処理",
       "investigating": "調査中",
-      "contained": "抑止済み",
+      "contained": "封じ込め済み",
       "resolved": "解決済み",
       "closed": "クローズ済み",
       "in_review": "レビュー中",
       "approved": "承認済み",
-      "changes_requested": "変更が要求済み",
+      "changes_requested": "変更要求あり",
       "merged": "マージ済み"
     },
     "suggestion_type": {
@@ -473,8 +473,8 @@
     "of": "{shown} / {total}"
   },
   "placeholder": {
-    "search": "検索...",
-    "select_owner": "責任者を選択..."
+    "search": "検索…",
+    "select_owner": "責任者を選択…"
   },
   "tab": {
     "overview": "概要",

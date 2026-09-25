@@ -12,7 +12,7 @@
   "create": {
     "heading": "サプライヤーを追加",
     "name_label": "名前 *",
-    "name_placeholder": "例: AWS、Office 365",
+    "name_placeholder": "例：AWS、Office 365",
     "type_label": "タイプ",
     "criticality_label": "重要度",
     "fill_in_later": "CIA分類、責任者、契約情報は作成後に追加できます。",
@@ -54,7 +54,7 @@
   "placeholder": {
     "contact": "contact{'@'}supplier.com",
     "contract_ref": "DPA / 契約URL",
-    "notes": "追加メモ... 文書をリンクするには /doc と入力"
+    "notes": "追加メモ… 文書をリンクするには /doc と入力"
   },
   "data_access": {
     "checkbox": "サプライヤーは当社のデータにアクセスできます",

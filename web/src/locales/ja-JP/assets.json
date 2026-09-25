@@ -12,7 +12,7 @@
   "create": {
     "heading": "資産を追加",
     "name_label": "名前 *",
-    "name_placeholder": "例: 本番データベース、カスタマーポータル",
+    "name_placeholder": "例：本番データベース、カスタマーポータル",
     "type_label": "種類",
     "deselect_hint": "クリックして選択解除",
     "fill_in_later": "CIA分類、責任者などは作成後に追加できます。",
@@ -51,9 +51,9 @@
     "external_id": "外部ID"
   },
   "placeholder": {
-    "description": "資産について説明...",
-    "primary_location": "例: Reykjavík DC、AWS eu-west-1",
-    "notes": "追加メモ... 文書をリンクするには /doc と入力"
+    "description": "資産について説明…",
+    "primary_location": "例：Reykjavík DC、AWS eu-west-1",
+    "notes": "追加メモ… 文書をリンクするには /doc と入力"
   },
   "detail": {
     "overview": "概要",

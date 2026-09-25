@@ -1,6 +1,6 @@
 {
   "title": "受信トレイ",
-  "subtitle": "{count} 件の対応項目が対応を要します | {count} 件の対応項目が対応を要します",
+  "subtitle": "対応が必要な項目が {count} 件あります | 対応が必要な項目が {count} 件あります",
   "mark_all_read": "すべて既読にする",
   "tab": {
     "comments": "コメント",
@@ -8,7 +8,7 @@
     "tasks": "タスク",
     "incidents": "インシデント",
     "changes": "変更",
-    "corrective_actions": "是正措置",
+    "corrective_actions": "是正処置",
     "suggestions": "提案"
   },
   "comments": {
@@ -29,7 +29,7 @@
       "version": "バージョン",
       "requested_by": "要求者"
     },
-    "assigned_reviewers": "割り当てられたレビューアー",
+    "assigned_reviewers": "割り当てられたレビュー担当者",
     "recent_comments": "最近のコメント",
     "open_review": "レビュー #{id} を開く"
   },
@@ -54,7 +54,7 @@
     "empty": "あなたに割り当てられたインシデントはありません"
   },
   "corrective_actions": {
-    "empty": "あなたに割り当てられた是正措置はありません"
+    "empty": "あなたに割り当てられた是正処置はありません"
   },
   "changes": {
     "add": "変更要求を追加",

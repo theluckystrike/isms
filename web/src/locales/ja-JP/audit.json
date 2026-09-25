@@ -39,7 +39,7 @@
     "items": "項目",
     "report": "レポート",
     "discussion": "ディスカッション",
-    "linked": "関連する是正措置"
+    "linked": "関連する是正処置"
   },
   "action": {
     "add_programme": "プログラムを追加",
@@ -47,7 +47,7 @@
     "add_audit": "監査を追加"
   },
   "calendar": {
-    "loading": "カレンダーを読み込み中...",
+    "loading": "カレンダーを読み込み中…",
     "audit_count": "監査{count}件 | 監査{count}件",
     "month_empty": "今月の監査予定はありません",
     "unscheduled": "未スケジュール",
@@ -56,7 +56,7 @@
     "empty": "{year} 年の監査はありません。プログラムから監査を追加するとここに表示されます。"
   },
   "programme": {
-    "search_placeholder": "プログラムを検索...",
+    "search_placeholder": "プログラムを検索…",
     "all_years": "すべての年",
     "empty_filtered": "フィルターに一致するプログラムがありません。",
     "empty": "監査プログラムがまだありません。プログラムを追加をクリックして作成してください。",
@@ -71,10 +71,10 @@
     "create": {
       "heading": "プログラムを追加",
       "title_label": "タイトル *",
-      "title_placeholder": "例: 2026年度監査プログラム",
+      "title_placeholder": "例：2026年度監査プログラム",
       "year_label": "年 *",
       "fill_in_later": "説明、状態、監査は作成後に追加できます。",
-      "submitting": "追加中...",
+      "submitting": "追加中…",
       "submit": "追加"
     },
     "field": {
@@ -88,8 +88,8 @@
       "created": "作成日"
     },
     "placeholder": {
-      "description": "プログラムの目的と範囲...",
-      "notes": "内部メモ..."
+      "description": "プログラムの目的と範囲…",
+      "notes": "内部メモ…"
     },
     "audits_heading": "このプログラムの監査",
     "add_audit": "+ 監査を追加",
@@ -102,7 +102,7 @@
     }
   },
   "audit": {
-    "loading_detail": "監査詳細を読み込み中...",
+    "loading_detail": "監査詳細を読み込み中…",
     "create": {
       "heading": "監査を追加",
       "title_label": "タイトル *",
@@ -111,7 +111,7 @@
       "no_programme": "プログラムなし（アドホック）",
       "type_label": "監査の種類",
       "fill_in_later": "範囲、監査人、日付、項目は作成後に追加できます。",
-      "submitting": "追加中...",
+      "submitting": "追加中…",
       "submit": "追加"
     },
     "field": {
@@ -131,9 +131,9 @@
       "notes": "メモ"
     },
     "placeholder": {
-      "scope": "範囲の説明。管理策や箇条をリンクするには /doc と入力...",
-      "auditor": "監査人を選択...",
-      "notes": "内部監査メモ..."
+      "scope": "範囲の説明。管理策や箇条をリンクするには /doc と入力…",
+      "auditor": "監査人を選択…",
+      "notes": "内部監査メモ…"
     },
     "open_count": "（未処理{count}件）",
     "danger": {
@@ -143,24 +143,24 @@
   "items": {
     "heading": "監査項目（{count}）",
     "add": "+ 項目を追加",
-    "search_placeholder": "文書、管理策、箇条、リスク、資産を検索...",
-    "searching": "検索中...",
+    "search_placeholder": "文書、管理策、箇条、リスク、資産を検索…",
+    "searching": "検索中…",
     "no_matches": "一致するものがありません。",
     "empty": "項目がまだありません。管理策、箇条、リスクなどの項目を追加して評価してください。",
     "raise_finding": "指摘事項を挙げる",
     "raise_finding_title": "この項目から指摘事項を作成",
     "delete_title": "項目を削除",
-    "evidence": "証拠",
-    "evidence_placeholder": "証拠の参照、リンク、説明...",
+    "evidence": "証跡",
+    "evidence_placeholder": "証拠の参照、リンク、説明…",
     "notes": "メモ",
     "notes_empty": "メモ（空）",
-    "notes_placeholder": "この項目のインラインメモ...",
+    "notes_placeholder": "この項目のインラインメモ…",
     "save_notes": "メモを保存",
     "confirm_remove": "この監査から「{title}」を削除しますか？",
     "remove": "削除"
   },
   "findings": {
-    "search_placeholder": "指摘事項を検索...",
+    "search_placeholder": "指摘事項を検索…",
     "all_audits": "すべての監査",
     "overdue_toggle_title": "切り替え: 期限切れのみ",
     "overdue_only": "期限切れのみ",
@@ -184,10 +184,10 @@
       "title_label": "タイトル *",
       "title_placeholder": "指摘事項のタイトル",
       "audit_label": "監査 *",
-      "audit_placeholder": "監査を選択...",
+      "audit_placeholder": "監査を選択…",
       "type_label": "種類",
-      "fill_in_later": "説明、責任者、期限、是正措置のリンクは作成後に追加できます。",
-      "submitting": "追加中...",
+      "fill_in_later": "説明、責任者、期限、是正処置のリンクは作成後に追加できます。",
+      "submitting": "追加中…",
       "submit": "追加"
     },
     "field": {
@@ -204,22 +204,22 @@
       "closed": "クローズ日"
     },
     "placeholder": {
-      "description": "詳細な指摘事項の説明、証拠、根本原因分析...",
-      "owner": "責任者を選択..."
+      "description": "詳細な指摘事項の説明、証拠、根本原因分析…",
+      "owner": "責任者を選択…"
     },
     "item_ref": "項目 #{id}",
     "quick_action": "クイック操作",
-    "create_ca": "指摘事項から是正措置を作成",
-    "create_ca_hint": "この指摘事項のタイトルと重大度を事前入力した是正措置を作成します。",
+    "create_ca": "指摘事項から是正処置を作成",
+    "create_ca_hint": "この指摘事項のタイトルと重大度を事前入力した是正処置を作成します。",
     "danger": {
-      "warning": "この指摘事項の削除は永続的です。リンクされた是正措置は残りますが、この逆参照は失われます。",
+      "warning": "この指摘事項の削除は永続的です。リンクされた是正処置は残りますが、この逆参照は失われます。",
       "delete": "指摘事項を削除",
       "confirm": "この指摘事項を削除しますか？元に戻せません。"
     }
   },
   "report": {
     "heading": "監査レポート",
-    "placeholder": "監査人の最終レポート — 観察事項、結論、推奨事項。スラッシュコマンドで管理策、箇条、証拠をリンクできます...",
+    "placeholder": "監査人の最終レポート — 観察事項、結論、推奨事項。スラッシュコマンドで管理策、箇条、証拠をリンクできます…",
     "empty": "レポートはまだ書かれていません。"
   },
   "dirty": {
