@@ -294,8 +294,34 @@ function getOrgSlug() {
   //    subdomain mode none of them are.
   const redirect = params.get('redirect')
   if (redirect) {
-    const org = router.resolve(redirect).params.org
-    if (org) return org
+    const resolved = router.resolve(redirect)
+    if (resolved.params.org) return resolved.params.org
+
+    // 4b. Only fall back when the bounced path matches NO route at all —
+    // not just when it matches one without an :org param (/organizations,
+    // /login, / all resolve fine and simply aren't org-scoped; treating
+    // their first path segment as an org slug is exactly the bug the
+    // "?redirect=/organizations" test below guards against). The org root
+    // alone (/acme-logistics, no suffix) isn't one of orgScopedRoutes'
+    // suffixed paths, so a bare visit there is the genuinely-unmatched case:
+    // the org is otherwise lost, forcing a visitor to retype a slug that was
+    // right there in the URL they landed on. This recovered value becomes
+    // the org context for the whole login form (hides the org picker, shows
+    // as the subtitle, and is sent as `organization` in the login request),
+    // not just an editable pre-fill — so it must be the actual path segment,
+    // not raw text off the query string. Split router.resolve()'s own
+    // `.path` rather than the raw `redirect` param: the guard builds
+    // `redirect` from `to.fullPath`, which carries the query string and hash
+    // along with the path (?redirect=/acme-logistics?utm_source=mail would
+    // otherwise yield the slug "acme-logistics?utm_source=mail"), while
+    // `.path` is already stripped down to the router's own path component.
+    // Path mode only: in subdomain mode a redirect target has no /:org
+    // prefix to begin with, so its first segment is a page name (e.g.
+    // "overview"), not an org slug.
+    if (!resolved.matched.length && !isSubdomainMode()) {
+      const seg = resolved.path.split('/').filter(Boolean)[0]
+      if (seg) return seg
+    }
   }
 
   // No localStorage fallback — org context must come from URL/subdomain only.
@@ -322,9 +348,16 @@ function goToOrg() {
 }
 
 async function redirectAfterLogin() {
-  // Check for a redirect query param first
+  // Check for a redirect query param first — but only push it if it's an
+  // actual matched route. A bare org root (/acme-logistics, no suffix) isn't
+  // one of orgScopedRoutes' suffixed paths, so it can end up here unmatched
+  // (a bounced deep link to the org root, or the redirect param surviving a
+  // hash-token exchange); pushing it verbatim would land on a blank page
+  // with nothing rendered. Fall through to the org-overview logic below
+  // instead, which knows how to build a real destination from orgSlug.value.
   const redirectPath = firstRedirect(route.query)
-  if (redirectPath && redirectPath !== '/overview' && redirectPath.startsWith('/')) {
+  if (redirectPath && redirectPath !== '/overview' && redirectPath.startsWith('/') &&
+      router.resolve(redirectPath).matched.length > 0) {
     router.push(redirectPath)
     return
   }

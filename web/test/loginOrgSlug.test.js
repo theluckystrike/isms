@@ -38,9 +38,10 @@ function buildRouter(subdomainMode) {
 }
 
 // Transplant of Login.vue's getOrgSlug(), source 4 (the #241 fix under
-// review). `search` stands in for window.location.search, `path` for
-// window.location.pathname.
-function getOrgSlug({ search, path, subSlug, router }) {
+// review) plus source 4b (the org-root-redirect fix this file's newer tests
+// cover). `search` stands in for window.location.search, `path` for
+// window.location.pathname, `subdomainMode` for isSubdomainMode().
+function getOrgSlug({ search, path, subSlug, router, subdomainMode = false }) {
   const params = new URLSearchParams(search)
   if (params.get('org')) return params.get('org')
   if (subSlug) return subSlug
@@ -48,8 +49,12 @@ function getOrgSlug({ search, path, subSlug, router }) {
   if (pathParts.length >= 2 && pathParts[1] === 'login') return pathParts[0]
   const redirect = params.get('redirect')
   if (redirect) {
-    const org = router.resolve(redirect).params.org
-    if (org) return org
+    const resolved = router.resolve(redirect)
+    if (resolved.params.org) return resolved.params.org
+    if (!resolved.matched.length && !subdomainMode) {
+      const seg = resolved.path.split('/').filter(Boolean)[0]
+      if (seg) return seg
+    }
   }
   return ''
 }
@@ -76,6 +81,53 @@ test('subdomain mode: ?redirect=/documents does not get misread as an org slug',
   assert.equal(slug, '')
 })
 
+// The bare org root (/acme-logistics, no suffix) isn't one of
+// orgScopedRoutes' suffixed paths — router.resolve() finds no match at all,
+// not just a match with no :org param. Visiting it while unauthenticated
+// bounces to /login?redirect=/acme-logistics/ same as any other deep link,
+// but source 4 alone can't recover the org from a redirect target that
+// itself matches nothing — hence 4b's unmatched-path fallback.
+test('?redirect=/acme-logistics/ (bare org root, no suffix) still recovers the org', () => {
+  const router = buildRouter(false)
+  const slug = getOrgSlug({ search: '?redirect=%2Facme-logistics%2F', path: '/login', subSlug: null, router })
+  assert.equal(slug, 'acme-logistics')
+})
+
+test('?redirect=/acme-logistics (no trailing slash) still recovers the org', () => {
+  const router = buildRouter(false)
+  const slug = getOrgSlug({ search: '?redirect=%2Facme-logistics', path: '/login', subSlug: null, router })
+  assert.equal(slug, 'acme-logistics')
+})
+
+// Review finding F2: the router guard builds `redirect` from `to.fullPath`,
+// which carries the query string and hash along with the path — a bare-org
+// visit with tracking params or a hash fragment is a plausible sales-demo
+// link (e.g. an email campaign link, or a deep link into a page section).
+// Splitting the raw `redirect` string's first segment (the pre-fix code)
+// swallows everything after the org, including the "?"/"#" separator, into
+// the recovered slug. Splitting router.resolve()'s own `.path` instead
+// avoids this: `.path` is already stripped down to the route path.
+test('?redirect=/acme-logistics?utm_source=mail does not leak the query string into the slug', () => {
+  const router = buildRouter(false)
+  const slug = getOrgSlug({ search: '?redirect=%2Facme-logistics%3Futm_source%3Dmail', path: '/login', subSlug: null, router })
+  assert.equal(slug, 'acme-logistics')
+})
+
+test('?redirect=/acme-logistics#pricing does not leak the hash into the slug', () => {
+  const router = buildRouter(false)
+  const slug = getOrgSlug({ search: '?redirect=%2Facme-logistics%23pricing', path: '/login', subSlug: null, router })
+  assert.equal(slug, 'acme-logistics')
+})
+
+test('subdomain mode: an unmatched single-segment redirect is never read as an org', () => {
+  // Subdomain mode has no /:org prefix at all, so there's no bare-org-root
+  // case to recover — an unmatched path here is just a typo/dead link, and
+  // 4b must not guess its first segment is an org slug.
+  const router = buildRouter(true)
+  const slug = getOrgSlug({ search: '?redirect=%2Fsome-typo', path: '/login', subSlug: null, router, subdomainMode: true })
+  assert.equal(slug, '')
+})
+
 test('an explicit ?org= still wins over a redirect-derived org', () => {
   const router = buildRouter(false)
   const slug = getOrgSlug({ search: '?org=beta&redirect=%2Facme%2Fdocuments', path: '/login', subSlug: null, router })
@@ -96,4 +148,28 @@ test('the redirect-derived org reaches the real login() request body', async () 
   await login('a@b.com', 'pw', undefined, slug || undefined)
 
   assert.equal(capturedBody.organization, 'acme')
+})
+
+// Companion fix, same underlying bug: redirectAfterLogin() used to push
+// route.query.redirect verbatim as long as it started with "/" — a bare org
+// root (/acme-logistics, no suffix) passes that check but matches no route,
+// so pushing it landed on a blank page after a successful login instead of
+// falling through to gotoOverview()'s known-good destination. Transplant of
+// just the decision (shouldPushRedirect), not the whole async function —
+// the rest of redirectAfterLogin is API calls and router.push side effects
+// with nothing left to assert once this guard is right.
+function shouldPushRedirect(redirectPath, router) {
+  return !!(redirectPath && redirectPath !== '/overview' && redirectPath.startsWith('/') &&
+    router.resolve(redirectPath).matched.length > 0)
+}
+
+test('redirectAfterLogin pushes a real matched destination', () => {
+  const router = buildRouter(false)
+  assert.equal(shouldPushRedirect('/acme/documents', router), true)
+})
+
+test('redirectAfterLogin falls through instead of pushing an unmatched bare org root', () => {
+  const router = buildRouter(false)
+  assert.equal(shouldPushRedirect('/acme-logistics/', router), false)
+  assert.equal(shouldPushRedirect('/acme-logistics', router), false)
 })

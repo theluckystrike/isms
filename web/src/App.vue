@@ -591,14 +591,32 @@ if (typeof window !== 'undefined') {
 const { orgSlug: routeOrgSlug, orgPath } = useCurrentOrg()
 const orgSlug = computed(() => routeOrgSlug.value || currentUserData.value?.organization_slug || '')
 const orgHomeLink = computed(() => orgSlug.value ? orgPath('/overview') : '/')
-const isPublicRoute = computed(() =>
-  route.path === '/login' ||
-  route.path === '/signup' ||
-  route.path === '/forgot-password' ||
-  route.path === '/verify-email' ||
-  route.path === '/' ||
-  route.path === '/landing'
-)
+// Mirrors the router's own `meta.public` flag (router.js) rather than a
+// hardcoded path list — a hardcoded '/login' never matches path-mode's
+// org-scoped '/<org>/login' (a real, registered public route), so this used
+// to fail open on that exact page: loadAppData() ran anyway, its getMe()
+// call 401'd for a not-yet-logged-in visitor, and the failure handler
+// (useSession.js's loadUserData) bounced to bare '/login', dropping the org
+// the user was already correctly on.
+//
+// The second clause covers vue-router's START_LOCATION: main.js mounts
+// before the initial navigation resolves, so the very first render and
+// onMounted see path '/', meta {}, matched [] — a real '/' always resolves
+// to Landing, so "path '/' with nothing matched" only ever means the
+// unresolved placeholder. The old hardcoded list included '/' and so
+// treated this moment as public too; without this clause, mount-time
+// loadAppData() runs while every visitor (token or not) still looks
+// unauthenticated to the route, reproducing the exact redirect-loop this
+// fix targets, timing-dependent on whether the resulting 401 lands before
+// or after the router finishes resolving.
+//
+// Shared with the router.afterEach below (same placeholder handling is
+// needed on both the current route and a departing `from` route there) so
+// the two never drift apart into their own hardcoded lists.
+function isRoutePublic(r) {
+  return !!r.meta.public || (r.path === '/' && r.matched.length === 0)
+}
+const isPublicRoute = computed(() => isRoutePublic(route))
 
 // Thin wrappers that wire composable calls to local context (router, orgSlug, showUserMenu)
 async function logout() {
@@ -772,24 +790,36 @@ onMounted(() => {
   // Handle 401 from any API call — redirect to login. Skip when the user is
   // already on a public auth page (signup / forgot-password / verify-email /
   // login itself) so that a stale token doesn't kick them away from a flow
-  // they're actively trying to complete.
+  // they're actively trying to complete. Gated on the route's own
+  // `meta.public` flag, not a hardcoded path list: a hardcoded '/login' never
+  // matches path-mode's org-scoped '/<org>/login' (a real, registered public
+  // route — see router.js), so a stale/absent token's 401 on that exact page
+  // used to strip the org prefix and bounce here, dropping the user into the
+  // org-picker instead of the login form they were already looking at.
   window.addEventListener('isms:unauthorized', () => {
     stopRefreshTimer()
-    const publicAuthPaths = ['/login', '/signup', '/forgot-password', '/verify-email', '/']
-    if (publicAuthPaths.includes(route.path)) return
+    if (route.meta.public) return
     router.push('/login')
   })
 })
 onUnmounted(stopRefreshTimer)
-watch(() => route.path, (newPath, oldPath) => {
-  // Reload app data when navigating from a public/landing path into an org route.
-  // Includes `/` because Vue Router's initial render hits apex before beforeEach
-  // redirects to /overview on subdomain hosts — that first onMounted call returns
-  // early (isPublicRoute), so we need this watcher to fire loadAppData on the hop.
-  const publicPaths = ['/login', '/organizations', '/']
-  if (publicPaths.includes(oldPath) && !publicPaths.includes(newPath)) {
+// Reload app data when navigating from a public/landing route into a
+// non-public one. Uses router.afterEach rather than the route.path watcher
+// below, because that's the only hook vue-router gives both the departing
+// and arriving route's own meta — matching isPublicRoute's own source of
+// truth (isRoutePublic, above) instead of a second hardcoded path list that
+// would drift from it. Covers the same apex-then-redirect hop the old
+// list's `/` entry did: vue-router's initial render hits apex before
+// beforeEach redirects to /overview on subdomain hosts, and that first
+// onMounted call returns early (isPublicRoute), so this is what fires
+// loadAppData on the hop — isRoutePublic(from) is true for that placeholder
+// departure for the same reason isPublicRoute was true for it at mount.
+router.afterEach((to, from) => {
+  if (isRoutePublic(from) && !isRoutePublic(to)) {
     loadAppData()
   }
+})
+watch(() => route.path, (newPath) => {
   // Also reload when org changes in URL (path-based mode only — on subdomain
   // mode the org is bound to the host so it never changes mid-session).
   if (route.params.org && route.params.org !== currentUserData.value?.organization_slug) {
