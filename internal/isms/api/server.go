@@ -2868,9 +2868,9 @@ func (s *Server) handleUpdateRisk(c echo.Context) error {
 	if req.LastReview != nil {
 		updated.LastReview = *req.LastReview
 	}
-	if req.NextReview != nil {
-		updated.NextReview = *req.NextReview
-	}
+	// A new next_review from the request wins over the calculated one; absent,
+	// null or an echo of the stored date means "calculate it" (#202).
+	explicitNextReview := requestedNextReview(req.NextReview, old.NextReview)
 	if req.Notes != nil {
 		updated.Notes = *req.Notes
 	}
@@ -2898,7 +2898,7 @@ func (s *Server) handleUpdateRisk(c echo.Context) error {
 		updated.AcceptedByID = nil
 	}
 
-	if err := s.db.UpdateRisk(ctx, orgID, &updated); err != nil {
+	if err := s.db.UpdateRisk(ctx, orgID, &updated, explicitNextReview); err != nil {
 		return pgxHTTPError(err)
 	}
 	after, _ := s.db.GetRisk(ctx, orgID, id)
@@ -3005,9 +3005,9 @@ func (s *Server) handleUpdateSystem(c echo.Context) error {
 	if req.LastReview != nil {
 		updated.LastReview = *req.LastReview
 	}
-	if req.NextReview != nil {
-		updated.NextReview = *req.NextReview
-	}
+	// A new next_review from the request wins over the calculated one; absent,
+	// null or an echo of the stored date means "calculate it" (#202).
+	explicitNextReview := requestedNextReview(req.NextReview, old.NextReview)
 	if req.Owner != nil {
 		updated.Owner = *req.Owner
 	}
@@ -3017,7 +3017,7 @@ func (s *Server) handleUpdateSystem(c echo.Context) error {
 	if req.ExternalID != nil {
 		updated.ExternalID = *req.ExternalID
 	}
-	if err := s.db.UpdateSystem(ctx, orgID, &updated); err != nil {
+	if err := s.db.UpdateSystem(ctx, orgID, &updated, explicitNextReview); err != nil {
 		return pgxHTTPError(err)
 	}
 	after, _ := s.db.GetSystem(ctx, orgID, id)
@@ -3225,16 +3225,16 @@ func (s *Server) handleUpdateSupplier(c echo.Context) error {
 	if req.LastReview != nil {
 		updated.LastReview = *req.LastReview
 	}
-	if req.NextReview != nil {
-		updated.NextReview = *req.NextReview
-	}
+	// A new next_review from the request wins over the calculated one; absent,
+	// null or an echo of the stored date means "calculate it" (#202).
+	explicitNextReview := requestedNextReview(req.NextReview, old.NextReview)
 	if req.Notes != nil {
 		updated.Notes = *req.Notes
 	}
 	if req.ExternalID != nil {
 		updated.ExternalID = *req.ExternalID
 	}
-	if err := s.db.UpdateSupplier(ctx, orgID, &updated); err != nil {
+	if err := s.db.UpdateSupplier(ctx, orgID, &updated, explicitNextReview); err != nil {
 		return pgxHTTPError(err)
 	}
 	after, _ := s.db.GetSupplier(ctx, orgID, id)
