@@ -37,13 +37,17 @@ func inboxListCmd() *cobra.Command {
 				"ID", "TYPE", "DOCUMENT", "TITLE", "FROM", "STATUS")
 			fmt.Printf("  %s\n", strings.Repeat("-", 100))
 			for _, item := range items {
+				status := item.Status
+				if item.Role != "" {
+					status += " (" + item.Role + ")"
+				}
 				fmt.Printf("  %-6d %-10s %-14s %-36s %-20s %s\n",
 					item.ID,
 					item.Type,
 					item.DocumentID,
 					truncate(item.Title, 36),
 					truncate(item.From, 20),
-					item.Status,
+					status,
 				)
 			}
 			return nil
@@ -55,7 +59,7 @@ func inboxDumpCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "dump",
 		Short: "Dump all open items as JSON (for Claude Code to read)",
-		Long:  "Outputs all open reviews, comments, and tasks as structured JSON that Claude can process.",
+		Long:  "Outputs every review, comment, and task you are involved in as structured JSON that Claude can process. Each row has needs_action: true when it is waiting on you, false when you are only waiting on someone else.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c := requireAPI()
 			data, err := c.InboxDump()
