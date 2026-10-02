@@ -399,9 +399,9 @@
 
       <!-- Document view -->
       <div v-else class="p-8">
-        <div class="max-w-3xl mx-auto space-y-6">
+        <div class="max-w-3xl mx-auto space-y-6" :style="{ '--sticky-toolbar-top': breadcrumbBarHeight + 'px' }">
           <!-- Breadcrumb + actions bar (single line) -->
-          <div class="sticky top-0 z-10 bg-slate-950 pb-3 pt-2 flex items-center gap-3">
+          <div ref="breadcrumbBarRef" class="sticky top-0 z-10 bg-slate-950 pb-3 pt-2 flex items-center gap-3">
             <nav v-if="activeBreadcrumb.length > 0" class="flex items-center gap-1 text-xs text-slate-500 min-w-0 flex-1 overflow-hidden">
               <template v-for="(crumb, idx) in activeBreadcrumb" :key="idx">
                 <span v-if="idx > 0" class="text-slate-700 flex-shrink-0">/</span>
@@ -738,7 +738,12 @@
           <!-- NOTE: Documents intentionally use tiptap's internal dirty tracking (the editor is the
                source of truth for content state). Do NOT replace with useDirtyEdit — tiptap already
                tracks transactions, autosave is wired through useDocumentEditor's startAutosave. -->
-          <div v-if="editMode" class="rounded-xl overflow-hidden border border-slate-800">
+          <!-- No overflow-hidden here: it breaks the toolbar's `position: sticky`, since an
+               overflow-clipped ancestor becomes the sticky containing block instead of the
+               page. The toolbar and the tiptap content area already round their own
+               top/bottom corners (DocumentEditor.vue), so this box doesn't need to clip its
+               children to look right. -->
+          <div v-if="editMode" class="rounded-xl border border-slate-800">
             <DocumentEditor v-model="editContent" :editable="true" :documentId="activeId" :self-type="'document'" :self-id="activeId" @save="saveEdit" />
           </div>
 
@@ -1606,6 +1611,35 @@ const activeBreadcrumb = computed(() => {
   const crumbs = parts.slice(0, -1)
   if (activeId.value) crumbs.push(activeId.value)
   return crumbs
+})
+
+// The breadcrumb bar's own measured height, so the document editor's sticky
+// toolbar (DocumentEditor.vue) can stick just below it instead of underneath
+// it — both are `position: sticky` at the same scroll container, so without
+// this the toolbar would land at the same `top: 0` and cover the breadcrumb
+// once both are stuck. Measured rather than hardcoded because the row's
+// height depends on its content: edit mode swaps the Edit button for
+// Save/Cancel, which isn't guaranteed to render at an identical height.
+const breadcrumbBarRef = ref(null)
+const breadcrumbBarHeight = ref(0)
+let breadcrumbBarObserver = null
+// The breadcrumb bar only exists in the DOM while a document is selected
+// (the "Document view" branch below), so the element — and the observer
+// watching it — comes and goes with that, not with the component's own
+// mount/unmount.
+watch(breadcrumbBarRef, (el) => {
+  breadcrumbBarObserver?.disconnect()
+  if (!el) return
+  breadcrumbBarObserver = new ResizeObserver(([entry]) => {
+    // contentRect excludes padding. The bar is `pt-2 pb-3` (20px of it), so
+    // contentRect under-measured the real height by exactly that much — the
+    // toolbar stuck 20px too high and covered the bar's own bottom edge,
+    // Save/Cancel buttons included. borderBoxSize (or offsetHeight, for the
+    // one browser path where a ResizeObserver entry might not carry it) is
+    // the full rendered box, what's actually needed to clear it.
+    breadcrumbBarHeight.value = entry.borderBoxSize?.[0]?.blockSize ?? entry.target.offsetHeight
+  })
+  breadcrumbBarObserver.observe(el)
 })
 
 // Check if a file needs review (has review_cycle or non-draft status)
@@ -2707,6 +2741,7 @@ document.addEventListener('click', (e) => {
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', closeMentionOnClickOutside)
+  breadcrumbBarObserver?.disconnect()
 })
 </script>
 
@@ -2990,6 +3025,9 @@ onBeforeUnmount(() => {
 .doc-prose :deep(.tbl-cell strong) {
   color: rgb(241 245 249);
   font-weight: 600;
+}
+.doc-prose :deep(.tbl-cell.has-text-color strong) {
+  color: inherit;
 }
 /* First header block gets top border + rounded top */
 .comment-block:has(.tbl-grid:not(.tbl-row)) {
