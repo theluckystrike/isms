@@ -1,6 +1,7 @@
 package store
 
 import (
+	"errors"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -1069,6 +1070,88 @@ func TestDeleteDirectory(t *testing.T) {
 	}
 	if !strings.Contains(string(got), "act-1") {
 		t.Error("active doc content should be intact")
+	}
+}
+
+// commitTitle creates a folder the way the UI does: a .title file and nothing else.
+func commitTitle(t *testing.T, st *Store, relDir, title string) {
+	t.Helper()
+	absPath := filepath.Join(st.Root(), relDir, ".title")
+	if _, err := st.CommitFile(absPath, []byte(title+"\n"), "Test User", "test@example.com", "create "+relDir); err != nil {
+		t.Fatalf("CommitFile %s: %v", relDir, err)
+	}
+}
+
+func TestDeleteEmptyFolder(t *testing.T) {
+	st := initBareStore(t, t.TempDir())
+	commitTestDoc(t, st, "documents/keep/doc.md", "keep-1", "Keep", "body\n")
+	commitTitle(t, st, "documents/custom", "Custom")
+	commitTitle(t, st, "documents/custom/nested", "Nested")
+
+	dirPath := filepath.Join(st.Root(), "documents", "custom")
+	hash, err := st.DeleteEmptyFolder(dirPath, "Folder Owner", "owner@example.com", "chore: delete folder custom")
+	if err != nil {
+		t.Fatalf("DeleteEmptyFolder: %v", err)
+	}
+
+	for _, rel := range []string{"documents/custom/.title", "documents/custom/nested/.title"} {
+		if _, err := st.ReadFile(filepath.Join(st.Root(), rel)); err == nil {
+			t.Errorf("%s should be gone after the folder is deleted", rel)
+		}
+	}
+	if _, err := st.ReadFile(filepath.Join(st.Root(), "documents", "keep", "doc.md")); err != nil {
+		t.Errorf("a document in another folder should survive: %v", err)
+	}
+
+	head, err := st.HeadCommit()
+	if err != nil {
+		t.Fatalf("HeadCommit: %v", err)
+	}
+	if head.Hash.String() != hash {
+		t.Errorf("HEAD = %s, want the returned commit %s", head.Hash, hash)
+	}
+	if head.Author.Name != "Folder Owner" || head.Author.Email != "owner@example.com" {
+		t.Errorf("commit author = %s <%s>, want the acting user", head.Author.Name, head.Author.Email)
+	}
+}
+
+func TestDeleteEmptyFolderRefusesFolderWithDocuments(t *testing.T) {
+	st := initBareStore(t, t.TempDir())
+	commitTitle(t, st, "documents/custom", "Custom")
+	// The document sits one level down, so the check has to look past the
+	// folder's own entries.
+	commitTestDoc(t, st, "documents/custom/nested/doc.md", "nested-1", "Nested", "body\n")
+	before, err := st.HeadCommit()
+	if err != nil {
+		t.Fatalf("HeadCommit: %v", err)
+	}
+
+	dirPath := filepath.Join(st.Root(), "documents", "custom")
+	if _, err := st.DeleteEmptyFolder(dirPath, "Admin", "admin@test.com", "delete"); !errors.Is(err, ErrFolderNotEmpty) {
+		t.Fatalf("DeleteEmptyFolder error = %v, want ErrFolderNotEmpty", err)
+	}
+
+	after, err := st.HeadCommit()
+	if err != nil {
+		t.Fatalf("HeadCommit: %v", err)
+	}
+	if after.Hash != before.Hash {
+		t.Error("a refused delete must not create a commit")
+	}
+	if _, err := st.ReadFile(filepath.Join(st.Root(), "documents", "custom", "nested", "doc.md")); err != nil {
+		t.Errorf("the document should still be there: %v", err)
+	}
+}
+
+func TestDeleteEmptyFolderNotFound(t *testing.T) {
+	st := initBareStore(t, t.TempDir())
+	commitTestDoc(t, st, "documents/keep/doc.md", "keep-1", "Keep", "body\n")
+
+	for _, rel := range []string{"documents/missing", "documents/keep/doc.md"} {
+		_, err := st.DeleteEmptyFolder(filepath.Join(st.Root(), rel), "Admin", "admin@test.com", "delete")
+		if !errors.Is(err, ErrFolderNotFound) {
+			t.Errorf("DeleteEmptyFolder(%s) error = %v, want ErrFolderNotFound", rel, err)
+		}
 	}
 }
 

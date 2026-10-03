@@ -258,6 +258,7 @@ export const api = {
   updateDocumentContent: (docId, content, version, author, owner) => putJSON(`${API}/documents/${encodeURIComponent(docId)}/content`, { content, ...(version && { version }), ...(author && { author }), ...(owner !== undefined && { owner }) }),
   createDocument: (doc) => postJSON(`${API}/documents`, doc),
   createFolder: (path, title) => postJSON(`${API}/documents/folders`, { path, title }),
+  deleteFolder: (path) => deleteJSON(`${API}/documents/folders?path=${encodeURIComponent(path)}`),
   deleteDocument: (docId) => deleteJSON(`${API}/documents/${encodeURIComponent(docId)}`),
 
   // Risks

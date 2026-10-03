@@ -25,6 +25,13 @@ import (
 // ErrConflict is returned when a concurrent modification is detected (HEAD changed).
 var ErrConflict = fmt.Errorf("conflict: document was modified by another user")
 
+// ErrFolderNotFound is returned by DeleteEmptyFolder when no folder exists at the path.
+var ErrFolderNotFound = fmt.Errorf("folder not found")
+
+// ErrFolderNotEmpty is returned by DeleteEmptyFolder when the folder still holds
+// a document, or any file other than a .title, at any depth.
+var ErrFolderNotEmpty = fmt.Errorf("folder is not empty")
+
 // NewBare opens a bare git repository and returns a Store that reads
 // files directly from git objects (HEAD commit tree) instead of the filesystem.
 func NewBare(repoPath string) (*Store, error) {
@@ -1616,7 +1623,51 @@ func (s *Store) DeleteDirectory(dirPath, authorName, authorEmail, message string
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	return s.deleteDirectoryUnlocked(dirPath, authorName, authorEmail, message)
+}
 
+// DeleteEmptyFolder removes a folder that holds no documents and commits the
+// change. A folder is empty when every file under it, at any depth, is a .title
+// file, so a folder whose only children are empty subfolders is empty too.
+// Anything else returns ErrFolderNotEmpty and leaves the repo untouched. The
+// check and the removal run under the same lock, so a document committed into
+// the folder in between cannot be deleted along with it.
+func (s *Store) DeleteEmptyFolder(dirPath, authorName, authorEmail, message string) (string, error) {
+	if s.repo == nil {
+		return "", fmt.Errorf("not a bare repo store")
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	tree, err := s.headTree()
+	if err != nil {
+		return "", err
+	}
+	relPath := strings.ReplaceAll(s.relPath(dirPath), string(filepath.Separator), "/")
+	folder, err := tree.Tree(relPath)
+	if err != nil {
+		return "", ErrFolderNotFound
+	}
+	files := folder.Files()
+	defer files.Close()
+	for {
+		f, err := files.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return "", fmt.Errorf("reading folder: %w", err)
+		}
+		if f.Name != ".title" && !strings.HasSuffix(f.Name, "/.title") {
+			return "", ErrFolderNotEmpty
+		}
+	}
+
+	return s.deleteDirectoryUnlocked(dirPath, authorName, authorEmail, message)
+}
+
+// deleteDirectoryUnlocked is DeleteDirectory without taking s.mu; the caller holds it.
+func (s *Store) deleteDirectoryUnlocked(dirPath, authorName, authorEmail, message string) (string, error) {
 	ref, err := s.repo.Head()
 	if err != nil {
 		return "", fmt.Errorf("resolving HEAD: %w", err)
