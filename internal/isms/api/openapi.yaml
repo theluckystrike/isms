@@ -807,6 +807,40 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
+  /documents/folders:
+    delete:
+      tags: [Documents]
+      summary: Delete an empty folder
+      description: >
+        Removes a document folder that holds no documents, along with any empty
+        subfolders, in one git commit attributed to the caller. A folder that
+        still holds a document is refused with 409. Requires manager or admin.
+      parameters:
+        - name: path
+          in: query
+          required: true
+          schema: { type: string }
+          description: Folder path under documents/, e.g. iso27001/policies/drafts
+      responses:
+        '200':
+          description: Folder deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  path: { type: string }
+                  commit: { type: string }
+                  status: { type: string }
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: The folder still holds a document
+
   /documents/{docId}/metadata:
     put:
       tags: [Documents]

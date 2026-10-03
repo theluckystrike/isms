@@ -545,6 +545,7 @@ func (s *Server) routes() {
 	api.PUT("/documents/:docId/content", s.handleUpdateDocumentContent)
 	api.POST("/documents", s.handleCreateDocument)
 	api.POST("/documents/folders", s.handleCreateFolder)
+	api.DELETE("/documents/folders", s.handleDeleteFolder)
 	api.DELETE("/documents/:docId", s.handleDeleteDocument)
 	api.GET("/documents/validate", s.handleValidateDocuments)
 
@@ -1477,6 +1478,59 @@ func (s *Server) handleCreateFolder(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, map[string]string{"path": req.Path, "commit": commitHash})
+}
+
+// DELETE /api/v1/documents/folders?path=<folder> deletes an empty folder.
+// Only a folder that holds no documents can be removed, so this never deletes
+// a document. Those go one at a time through DELETE /documents/:docId (#310).
+func (s *Server) handleDeleteFolder(c echo.Context) error {
+	if err := requireRole(c, "admin", "manager"); err != nil {
+		return err
+	}
+	orgID := getOrgID(c)
+	ctx := c.Request().Context()
+
+	folder := strings.TrimSuffix(c.QueryParam("path"), "/")
+	if folder == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "path is required")
+	}
+	for _, seg := range strings.Split(folder, "/") {
+		if seg == "" || seg == "." || seg == ".." {
+			return echo.NewHTTPError(http.StatusBadRequest, "invalid folder path")
+		}
+	}
+
+	st, err := s.storeForOrg(ctx, orgID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	email := getUserEmail(c)
+	user, _ := s.db.GetUserByEmail(ctx, email)
+	authorName := email
+	if user != nil && user.Name != "" {
+		authorName = user.Name
+	}
+
+	dirPath := filepath.Join(st.Root(), "documents", filepath.FromSlash(folder))
+	commitHash, err := st.DeleteEmptyFolder(dirPath, authorName, email,
+		fmt.Sprintf("chore: delete folder %s", folder))
+	switch {
+	case errors.Is(err, store.ErrFolderNotFound):
+		return echo.NewHTTPError(http.StatusNotFound, "folder not found")
+	case errors.Is(err, store.ErrFolderNotEmpty):
+		return echo.NewHTTPError(http.StatusConflict, "folder is not empty: move or delete its documents first")
+	case err != nil:
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("deleting folder: %v", err))
+	}
+
+	s.logAndNotify(ctx, orgID, &db.Activity{
+		Actor:  email,
+		Action: "folder_deleted",
+		Detail: fmt.Sprintf("Deleted folder %s", folder),
+	})
+
+	return c.JSON(http.StatusOK, map[string]string{"path": folder, "commit": commitHash, "status": "deleted"})
 }
 
 func (s *Server) handleCreateDocument(c echo.Context) error {
