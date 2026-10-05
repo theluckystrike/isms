@@ -82,12 +82,40 @@ export function columnWidths(colCount, ths, ...rowCellGroups) {
   }).join(' ')
 }
 
+// Splits a block list into the runs the viewer renders: each table's blocks
+// (header and rows, all sharing the same `table` number) become one run, and
+// every stretch of non-table blocks between them becomes another. A table run
+// is rendered inside one shared horizontal scroller, so a table whose column
+// floors sum to more than the content width scrolls as a whole: the header
+// and every body row move together and stay aligned, instead of the header
+// clipping at the table's edge while the body rows paint past it (#395).
+// Scrolling each row on its own would let them drift apart again.
+//
+// Only the grouping changes. Every block keeps its own `index`, `html` and
+// `raw`, and the runs list the blocks in their original order, so comment
+// anchors (useDocumentComments.blockHash) and the document-order lookups
+// that query `.comment-block` elements by index are unaffected.
+export function groupTableBlocks(blocks) {
+  const runs = []
+  for (const block of blocks) {
+    const table = block.table ?? null
+    const last = runs[runs.length - 1]
+    if (last && last.table === table) {
+      last.blocks.push(block)
+    } else {
+      runs.push({ key: block.index, table, blocks: [block] })
+    }
+  }
+  return runs
+}
+
 export function buildContentBlocks(rawContent) {
   if (!rawContent) return []
   const html = parseMd(rawContent)
   const div = document.createElement('div')
   div.innerHTML = html
   const blocks = []
+  let tableCount = 0
 
   function addBlock(html, tag, text, raw) {
     const block = { index: blocks.length, html, tag, text }
@@ -98,6 +126,7 @@ export function buildContentBlocks(rawContent) {
     // silently detaching every comment already stored against it.
     if (raw !== undefined) block.raw = raw
     blocks.push(block)
+    return block
   }
 
   for (const child of div.children) {
@@ -124,6 +153,9 @@ export function buildContentBlocks(rawContent) {
     }
     // Tables — convert to grid-based rows so each gets a "+" button
     else if (tag === 'table') {
+      // Every block of this table carries the same `table` number, which
+      // groupTableBlocks uses to put them under one shared scroller.
+      const table = tableCount++
       // Header rows are found by their cells, not by a <thead> wrapper: tables authored
       // in the editor are stored as raw Tiptap HTML, which puts the <th> row directly in
       // <tbody> and emits no <thead> at all. A row mixing <th> and <td> is a body row with
@@ -149,7 +181,7 @@ export function buildContentBlocks(rawContent) {
           return `<div class="tbl-hdr-cell" style="${styleAttr}">${th.innerHTML}</div>`
         }).join('')
         const rawHeader = `<div class="tbl-grid" style="${equalGridCols}">${headerCells}</div>`
-        addBlock(`<div class="tbl-grid" style="${gridCols}">${headerCells}</div>`, 'thead', headerRows.map(tr => tr.textContent).join(''), rawHeader)
+        addBlock(`<div class="tbl-grid" style="${gridCols}">${headerCells}</div>`, 'thead', headerRows.map(tr => tr.textContent).join(''), rawHeader).table = table
       }
 
       // Each body row as separate block — gets its own "+" button!
@@ -161,7 +193,7 @@ export function buildContentBlocks(rawContent) {
           return `<div class="tbl-cell${extraClass}" style="${styleAttr}">${td.innerHTML}</div>`
         }).join('')
         const rawRow = `<div class="tbl-grid tbl-row" style="${equalGridCols}">${cells}</div>`
-        addBlock(`<div class="tbl-grid tbl-row" style="${gridCols}">${cells}</div>`, 'tr', tr.textContent || '', rawRow)
+        addBlock(`<div class="tbl-grid tbl-row" style="${gridCols}">${cells}</div>`, 'tr', tr.textContent || '', rawRow).table = table
       }
     }
     // Split blockquotes — each paragraph inside is commentable

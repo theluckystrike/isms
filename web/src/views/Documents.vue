@@ -771,153 +771,160 @@
 
           <!-- Rendered markdown content — paragraph-level commentable blocks -->
           <div v-else-if="!editMode && contentBlocks.length > 0" class="pr-12 pl-8 relative">
-            <div
-              v-for="block in contentBlocks"
-              :key="block.index"
-              class="comment-block relative group transition-colors duration-200 rounded -mx-2 px-2"
-              :class="{
-                'bg-blue-950/20': hasOpenComments(block.index),
-                'hover:bg-slate-900/40': !hasOpenComments(block.index),
-                'review-checked': reviewedBlocks.has(block.index)
-              }"
-            >
-              <!-- Review checkbox -->
-              <button
-                @click.stop="toggleReviewBlock(block.index)"
-                class="review-checkbox absolute -left-7 top-1.5 w-5 h-5 rounded-full flex items-center justify-center transition-all duration-300 ease-out cursor-pointer z-10"
-                :class="reviewedBlocks.has(block.index)
-                  ? 'bg-emerald-500 text-white scale-100 shadow-md shadow-emerald-900/40'
-                  : 'border border-slate-700 text-transparent opacity-0 group-hover:opacity-60 hover:!opacity-100 hover:border-slate-500'"
-                :title="reviewedBlocks.has(block.index) ? t('documents.content.mark_unreviewed') : t('documents.content.mark_reviewed')"
-              >
-                <svg class="w-3 h-3 transition-transform duration-300" :class="reviewedBlocks.has(block.index) ? 'scale-100' : 'scale-0'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </button>
-
-              <!-- The rendered content block (with [[TYPE:ID|Title]] reference pills) -->
-              <div v-mermaid v-html="sanitize(renderRefLinks(block.html))" class="doc-prose" @click="onRefLinkClick" />
-
-              <!-- Comment count badge (visible when paragraph has open comments) -->
-              <div
-                v-if="hasOpenComments(block.index)"
-                @click="toggleBlockComments(block.index)"
-                class="absolute -right-10 top-1 w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center cursor-pointer hover:bg-blue-500 transition-colors shadow-lg shadow-blue-900/30"
-                :title="blockCommentTitle(block.index)"
-              >
-                {{ commentCountForBlock(block.index) }}
-              </div>
-
-              <!-- Add comment button (appears on hover) -->
-              <button
-                v-if="!hasOpenComments(block.index)"
-                @click.stop="startInlineComment(block.index)"
-                class="absolute -right-10 top-1 w-6 h-6 rounded-full bg-slate-700 text-slate-400 text-xs flex items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-blue-600 hover:text-white hover:shadow-lg hover:shadow-blue-900/30 hover:scale-110"
-                :title="t('documents.content.add_comment')"
-              >
-                +
-              </button>
-
-              <!-- Inline comment thread (expanded below the block) -->
-              <transition
-                enter-active-class="transition-all duration-300 ease-out"
-                enter-from-class="opacity-0 -translate-y-2 max-h-0"
-                enter-to-class="opacity-100 translate-y-0 max-h-[2000px]"
-                leave-active-class="transition-all duration-200 ease-in"
-                leave-from-class="opacity-100 translate-y-0 max-h-[2000px]"
-                leave-to-class="opacity-0 -translate-y-2 max-h-0"
-              >
-                <div v-if="expandedBlock === block.index" class="mt-1 mb-4 ml-4 border-l-2 border-blue-600/60 pl-4 overflow-hidden">
-                  <!-- Existing comments for this block -->
-                  <div
-                    v-for="comment in commentsForBlock(block.index)"
-                    :key="comment.id"
-                    class="mb-2 bg-slate-900/80 backdrop-blur rounded-lg p-3 border border-slate-800/50 transition-opacity duration-200"
-                    :class="{ 'opacity-40 border-emerald-900/30': comment.status === 'resolved' }"
+            <!-- One run per table, and one per stretch of other blocks between tables
+                 (groupTableBlocks). A table run gets a shared horizontal scroller so its
+                 header and rows scroll together; other runs are display: contents. -->
+            <div v-for="run in blockRuns" :key="run.key" :class="run.table === null ? 'contents' : 'tbl-run'">
+              <div :class="run.table === null ? 'contents' : 'tbl-scroll'">
+                <div
+                  v-for="block in run.blocks"
+                  :key="block.index"
+                  class="comment-block relative group transition-colors duration-200 rounded -mx-2 px-2"
+                  :class="{
+                    'bg-blue-950/20': hasOpenComments(block.index),
+                    'hover:bg-slate-900/40': !hasOpenComments(block.index),
+                    'review-checked': reviewedBlocks.has(block.index)
+                  }"
+                >
+                  <!-- Review checkbox -->
+                  <button
+                    @click.stop="toggleReviewBlock(block.index)"
+                    class="review-checkbox absolute -left-7 top-1.5 w-5 h-5 rounded-full flex items-center justify-center transition-all duration-300 ease-out cursor-pointer z-10"
+                    :class="reviewedBlocks.has(block.index)
+                      ? 'bg-emerald-500 text-white scale-100 shadow-md shadow-emerald-900/40'
+                      : 'border border-slate-700 text-transparent opacity-0 group-hover:opacity-60 hover:!opacity-100 hover:border-slate-500'"
+                    :title="reviewedBlocks.has(block.index) ? t('documents.content.mark_unreviewed') : t('documents.content.mark_reviewed')"
                   >
-                    <div class="flex items-center gap-2 mb-1">
-                      <span class="text-xs font-semibold text-slate-300" :title="comment.author">{{ resolveUserName(comment.author) }}</span>
-                      <span class="text-[10px] text-slate-600">{{ formatDate(comment.created_at) }}</span>
-                      <div v-if="comment.status === 'resolved'" class="ml-auto flex items-center gap-1">
-                        <svg class="w-3 h-3 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                        <span class="text-[10px] text-emerald-500 font-medium">{{ t('documents.content.resolved') }}</span>
-                      </div>
-                      <button
-                        v-else
-                        @click="resolveComment(comment.id)"
-                        class="ml-auto text-[10px] text-slate-500 hover:text-emerald-400 transition-colors"
-                      >{{ t('common.action.resolve') }}</button>
-                    </div>
-                    <!-- Resolved: show collapsed or expanded body -->
-                    <template v-if="comment.status === 'resolved'">
-                      <div class="text-[10px] text-emerald-500/70 flex items-center gap-1 mb-1">
-                        {{ resolvedByLabel(comment) }}
-                      </div>
-                      <div
-                        v-if="!expandedResolvedInline.has(comment.id)"
-                        @click="toggleResolvedInline(comment.id)"
-                        class="text-sm text-slate-500 leading-relaxed truncate cursor-pointer hover:text-slate-400"
-                      >{{ firstLine(comment.body) }}</div>
-                      <div
-                        v-else
-                        @click="toggleResolvedInline(comment.id)"
-                        class="text-sm text-slate-500 leading-relaxed whitespace-pre-wrap cursor-pointer hover:text-slate-400"
-                        v-html="sanitize(renderCommentBody(comment.body))"
-                      ></div>
-                    </template>
-                    <!-- Open: show full body with @mention highlighting -->
-                    <div v-else class="text-sm text-slate-400 leading-relaxed whitespace-pre-wrap" v-html="sanitize(renderCommentBody(comment.body))"></div>
+                    <svg class="w-3 h-3 transition-transform duration-300" :class="reviewedBlocks.has(block.index) ? 'scale-100' : 'scale-0'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </button>
+
+                  <!-- Comment count badge (visible when paragraph has open comments) -->
+                  <div
+                    v-if="hasOpenComments(block.index)"
+                    @click="toggleBlockComments(block.index)"
+                    class="block-action absolute -right-10 top-1 w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center cursor-pointer hover:bg-blue-500 transition-colors shadow-lg shadow-blue-900/30"
+                    :title="blockCommentTitle(block.index)"
+                  >
+                    {{ commentCountForBlock(block.index) }}
                   </div>
 
-                  <!-- New comment form -->
-                  <div class="backdrop-blur rounded-lg p-3 border relative transition-colors duration-200 bg-slate-900/80 border-slate-800/50">
-                    <textarea
-                      ref="inlineTextareaRef"
-                      v-model="inlineCommentText"
-                      :placeholder="t('documents.content.inline_placeholder')"
-                      class="w-full bg-transparent border border-slate-700 rounded-md p-2 text-sm text-slate-300 placeholder-slate-600 resize-none focus:outline-none focus:ring-1 focus:border-blue-500 focus:ring-blue-500/30"
-                      rows="2"
-                      @input="e => handleCommentInput(e, 'inline')"
-                      @keydown="handleCommentKeydown"
-                      @keydown.meta.enter="submitInlineComment(expandedBlock)"
-                      @keydown.ctrl.enter="submitInlineComment(expandedBlock)"
-                    />
-                    <!-- @mention dropdown for inline textarea -->
-                    <div v-if="showMentionDropdown && mentionContext === 'inline'"
-                      class="z-50 bg-slate-800 border border-slate-700 rounded-lg shadow-xl py-1 w-56 -mt-1 mb-1">
-                      <button v-for="(u, idx) in mentionUsers" :key="u.email || u.name"
-                        @mousedown.prevent="selectMention(u)"
-                        class="w-full flex items-center gap-2 px-3 py-1.5 text-left hover:bg-slate-700 transition-colors"
-                        :class="{ 'bg-slate-700': idx === mentionSelectedIndex }">
-                        <div class="w-5 h-5 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0">
-                          {{ (u.name || '?').charAt(0) }}
+                  <!-- Add comment button (appears on hover) -->
+                  <button
+                    v-if="!hasOpenComments(block.index)"
+                    @click.stop="startInlineComment(block.index)"
+                    class="block-action absolute -right-10 top-1 w-6 h-6 rounded-full bg-slate-700 text-slate-400 text-xs flex items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-blue-600 hover:text-white hover:shadow-lg hover:shadow-blue-900/30 hover:scale-110"
+                    :title="t('documents.content.add_comment')"
+                  >
+                    +
+                  </button>
+
+                  <!-- The rendered content block (with [[TYPE:ID|Title]] reference pills) -->
+                  <div v-mermaid v-html="sanitize(renderRefLinks(block.html))" class="doc-prose" @click="onRefLinkClick" />
+
+                  <!-- Inline comment thread (expanded below the block) -->
+                  <transition
+                    enter-active-class="transition-all duration-300 ease-out"
+                    enter-from-class="opacity-0 -translate-y-2 max-h-0"
+                    enter-to-class="opacity-100 translate-y-0 max-h-[2000px]"
+                    leave-active-class="transition-all duration-200 ease-in"
+                    leave-from-class="opacity-100 translate-y-0 max-h-[2000px]"
+                    leave-to-class="opacity-0 -translate-y-2 max-h-0"
+                  >
+                    <div v-if="expandedBlock === block.index" class="block-thread mt-1 mb-4 ml-4 border-l-2 border-blue-600/60 pl-4 overflow-hidden">
+                      <!-- Existing comments for this block -->
+                      <div
+                        v-for="comment in commentsForBlock(block.index)"
+                        :key="comment.id"
+                        class="mb-2 bg-slate-900/80 backdrop-blur rounded-lg p-3 border border-slate-800/50 transition-opacity duration-200"
+                        :class="{ 'opacity-40 border-emerald-900/30': comment.status === 'resolved' }"
+                      >
+                        <div class="flex items-center gap-2 mb-1">
+                          <span class="text-xs font-semibold text-slate-300" :title="comment.author">{{ resolveUserName(comment.author) }}</span>
+                          <span class="text-[10px] text-slate-600">{{ formatDate(comment.created_at) }}</span>
+                          <div v-if="comment.status === 'resolved'" class="ml-auto flex items-center gap-1">
+                            <svg class="w-3 h-3 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span class="text-[10px] text-emerald-500 font-medium">{{ t('documents.content.resolved') }}</span>
+                          </div>
+                          <button
+                            v-else
+                            @click="resolveComment(comment.id)"
+                            class="ml-auto text-[10px] text-slate-500 hover:text-emerald-400 transition-colors"
+                          >{{ t('common.action.resolve') }}</button>
                         </div>
-                        <div class="min-w-0">
-                          <div class="text-xs text-slate-300 truncate">{{ u.name }}</div>
-                          <div class="text-[10px] text-slate-600 truncate">{{ u.email }}</div>
+                        <!-- Resolved: show collapsed or expanded body -->
+                        <template v-if="comment.status === 'resolved'">
+                          <div class="text-[10px] text-emerald-500/70 flex items-center gap-1 mb-1">
+                            {{ resolvedByLabel(comment) }}
+                          </div>
+                          <div
+                            v-if="!expandedResolvedInline.has(comment.id)"
+                            @click="toggleResolvedInline(comment.id)"
+                            class="text-sm text-slate-500 leading-relaxed truncate cursor-pointer hover:text-slate-400"
+                          >{{ firstLine(comment.body) }}</div>
+                          <div
+                            v-else
+                            @click="toggleResolvedInline(comment.id)"
+                            class="text-sm text-slate-500 leading-relaxed whitespace-pre-wrap cursor-pointer hover:text-slate-400"
+                            v-html="sanitize(renderCommentBody(comment.body))"
+                          ></div>
+                        </template>
+                        <!-- Open: show full body with @mention highlighting -->
+                        <div v-else class="text-sm text-slate-400 leading-relaxed whitespace-pre-wrap" v-html="sanitize(renderCommentBody(comment.body))"></div>
+                      </div>
+
+                      <!-- New comment form -->
+                      <div class="backdrop-blur rounded-lg p-3 border relative transition-colors duration-200 bg-slate-900/80 border-slate-800/50">
+                        <textarea
+                          ref="inlineTextareaRef"
+                          v-model="inlineCommentText"
+                          :placeholder="t('documents.content.inline_placeholder')"
+                          class="w-full bg-transparent border border-slate-700 rounded-md p-2 text-sm text-slate-300 placeholder-slate-600 resize-none focus:outline-none focus:ring-1 focus:border-blue-500 focus:ring-blue-500/30"
+                          rows="2"
+                          @input="e => handleCommentInput(e, 'inline')"
+                          @keydown="handleCommentKeydown"
+                          @keydown.meta.enter="submitInlineComment(expandedBlock)"
+                          @keydown.ctrl.enter="submitInlineComment(expandedBlock)"
+                        />
+                        <!-- @mention dropdown for inline textarea -->
+                        <div v-if="showMentionDropdown && mentionContext === 'inline'"
+                          class="z-50 bg-slate-800 border border-slate-700 rounded-lg shadow-xl py-1 w-56 -mt-1 mb-1">
+                          <button v-for="(u, idx) in mentionUsers" :key="u.email || u.name"
+                            @mousedown.prevent="selectMention(u)"
+                            class="w-full flex items-center gap-2 px-3 py-1.5 text-left hover:bg-slate-700 transition-colors"
+                            :class="{ 'bg-slate-700': idx === mentionSelectedIndex }">
+                            <div class="w-5 h-5 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0">
+                              {{ (u.name || '?').charAt(0) }}
+                            </div>
+                            <div class="min-w-0">
+                              <div class="text-xs text-slate-300 truncate">{{ u.name }}</div>
+                              <div class="text-[10px] text-slate-600 truncate">{{ u.email }}</div>
+                            </div>
+                          </button>
+                          <div v-if="mentionUsers.length === 0" class="px-3 py-2 text-xs text-slate-500">{{ t('documents.content.no_users') }}</div>
                         </div>
-                      </button>
-                      <div v-if="mentionUsers.length === 0" class="px-3 py-2 text-xs text-slate-500">{{ t('documents.content.no_users') }}</div>
-                    </div>
-                    <div class="flex items-center justify-end mt-2">
-                      <div class="flex gap-2">
-                        <button
-                          @click="expandedBlock = null; inlineCommentText = ''"
-                          class="text-xs text-slate-500 hover:text-slate-300 px-2 py-1 rounded transition-colors cursor-pointer"
-                        >{{ t('common.action.cancel') }}</button>
-                        <button
-                          @click="submitInlineComment(expandedBlock)"
-                          :disabled="!inlineCommentText.trim() || submittingInline"
-                          class="text-xs bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:text-slate-500 text-white px-3 py-1 rounded font-medium transition-colors cursor-pointer"
-                        >{{ submittingInline ? t('common.state.saving') : t('common.action.comment') }}
-                        </button>
+                        <div class="flex items-center justify-end mt-2">
+                          <div class="flex gap-2">
+                            <button
+                              @click="expandedBlock = null; inlineCommentText = ''"
+                              class="text-xs text-slate-500 hover:text-slate-300 px-2 py-1 rounded transition-colors cursor-pointer"
+                            >{{ t('common.action.cancel') }}</button>
+                            <button
+                              @click="submitInlineComment(expandedBlock)"
+                              :disabled="!inlineCommentText.trim() || submittingInline"
+                              class="text-xs bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:text-slate-500 text-white px-3 py-1 rounded font-medium transition-colors cursor-pointer"
+                            >{{ submittingInline ? t('common.state.saving') : t('common.action.comment') }}
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </transition>
                 </div>
-              </transition>
+              </div>
             </div>
           </div>
 
@@ -1365,7 +1372,7 @@
 import { ref, reactive, computed, watch, onMounted, nextTick, onBeforeUnmount, defineAsyncComponent } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import { buildContentBlocks } from '../utils/contentBlocks.js'
+import { buildContentBlocks, groupTableBlocks } from '../utils/contentBlocks.js'
 import DOMPurify from 'dompurify'
 import { formatDate as formatDateValue, formatRecent } from '../composables/useFormat.js'
 const sanitize = (html) => DOMPurify.sanitize(html, { ADD_ATTR: ['style', 'data-ref-type', 'data-ref-id'] })
@@ -2372,6 +2379,7 @@ async function removeTemplate(id) {
 
 // --- Paragraph-level content blocks ---
 const contentBlocks = computed(() => buildContentBlocks(rawContent.value))
+const blockRuns = computed(() => groupTableBlocks(contentBlocks.value))
 
 async function selectItem(folder, id, listItem) {
   activeId.value = id
@@ -3088,8 +3096,57 @@ onBeforeUnmount(() => {
   margin-top: -1px !important;
   margin-bottom: 0 !important;
 }
-/* Visual separator between comment blocks */
-.comment-block:has(.tbl-row) + .comment-block:not(:has(.tbl-row)):not(:has(.tbl-grid)) {
+/* Visual separator between a table and the block after it */
+.tbl-run:has(.tbl-row) + .contents > .contents > .comment-block:first-child {
   margin-top: 1rem !important;
+}
+/* Wide tables (#395): a table whose column floors sum to more than the
+   content width scrolls sideways as one unit. Its header and rows sit in one
+   shared scroller (.tbl-scroll), so they move together and stay aligned; a
+   table that fits has nothing to scroll and lays out exactly as before.
+
+   .tbl-run takes over the -mx-2 the table's comment blocks used to carry, so
+   the scroller and the blocks inside it keep the same box as before. Each
+   block grows to its grid's min-content width (the sum of the column floors)
+   when that is wider, so its hover and review backgrounds cover the whole row.
+
+   The review checkbox and the comment badge / "+" button sit in the gutters,
+   outside the scroller's box, so they must neither be clipped by it nor move
+   with it. Inside a table run the blocks are left unpositioned, which makes
+   .tbl-run (outside the scroller) their containing block: the controls keep
+   their horizontal offsets against the same edges as before, and with
+   top: auto they take their row's top as their static position.
+
+   A row's inline comment thread stays the width of the visible area and
+   does not scroll away (sticky at its usual 1.5rem inset: px-2 plus ml-4),
+   so its Cancel / Comment buttons stay on screen on a wide row. 100cqw is
+   the scroller's own width, hence container-type on .tbl-scroll. */
+.tbl-run {
+  position: relative;
+  margin-left: -0.5rem;
+  margin-right: -0.5rem;
+}
+.tbl-scroll {
+  overflow-x: auto;
+  container-type: inline-size;
+}
+.tbl-scroll > .comment-block {
+  position: static;
+  margin-left: 0;
+  margin-right: 0;
+  min-width: min-content;
+}
+.tbl-scroll > .comment-block > .review-checkbox {
+  top: auto;
+  margin-top: 0.375rem;
+}
+.tbl-scroll > .comment-block > .block-action {
+  top: auto;
+  margin-top: 0.25rem;
+}
+.tbl-scroll > .comment-block .block-thread {
+  position: sticky;
+  left: 1.5rem;
+  width: calc(100cqw - 2rem);
 }
 </style>

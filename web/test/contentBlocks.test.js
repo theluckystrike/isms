@@ -9,7 +9,7 @@ globalThis.Node = dom.window.Node
 globalThis.Element = dom.window.Element
 globalThis.HTMLElement = dom.window.HTMLElement
 
-const { buildContentBlocks } = await import('../src/utils/contentBlocks.js')
+const { buildContentBlocks, groupTableBlocks } = await import('../src/utils/contentBlocks.js')
 
 // Regression: splitting a list into one commentable block per <li> left each
 // item alone in a fresh <ol>, which resets an ordered list's visible number
@@ -257,4 +257,42 @@ test("the sub-processor table's short-column floors leave the long column real r
   const [thirdParty, , service, usLocation, euLocation] = floors // index 1 ("Purpose") is the long column, excluded
   const shortFloorSum = thirdParty + service + usLocation + euLocation
   assert.ok(shortFloorSum < 55, `expected the 4 short columns' floors (${shortFloorSum}ch total) to leave real room in a ~72ch budget`)
+})
+
+// #395: a table wider than the content area has to scroll as one unit, so
+// the viewer puts each table's blocks under one shared scroller. That needs
+// every block of a table tagged with the same table number, and the block
+// list split into runs without reordering or re-indexing anything.
+test('every block of a table carries that table\'s number; other blocks carry none', () => {
+  const md = 'Intro\n\n| A | B |\n| --- | --- |\n| 1 | 2 |\n| 3 | 4 |\n\nMiddle\n\n| C |\n| --- |\n| 5 |\n\nEnd\n'
+  const blocks = buildContentBlocks(md)
+  assert.deepEqual(
+    blocks.map((b) => [b.tag, b.table]),
+    [['p', undefined], ['thead', 0], ['tr', 0], ['tr', 0], ['p', undefined], ['thead', 1], ['tr', 1], ['p', undefined]],
+  )
+})
+
+test('groupTableBlocks gives each table its own run and keeps block order and indexes', () => {
+  const md = 'Intro\n\nMore\n\n| A | B |\n| --- | --- |\n| 1 | 2 |\n\n| C |\n| --- |\n| 5 |\n\nEnd\n'
+  const blocks = buildContentBlocks(md)
+  const runs = groupTableBlocks(blocks)
+  assert.deepEqual(
+    runs.map((r) => [r.table, r.blocks.map((b) => b.index)]),
+    [[null, [0, 1]], [0, [2, 3]], [1, [4, 5]], [null, [6]]],
+  )
+  // Flattening the runs gives back the original list, same objects, same
+  // order: comment anchors and the index-based .comment-block lookups are
+  // untouched.
+  assert.deepEqual(runs.flatMap((r) => r.blocks), blocks)
+  // Keys are unique so Vue can track the runs.
+  assert.equal(new Set(runs.map((r) => r.key)).size, runs.length)
+})
+
+test('groupTableBlocks: no tables is one run, and an empty list is no runs', () => {
+  assert.deepEqual(groupTableBlocks([]), [])
+  const blocks = buildContentBlocks('One\n\nTwo\n\n- three\n')
+  const runs = groupTableBlocks(blocks)
+  assert.equal(runs.length, 1)
+  assert.equal(runs[0].table, null)
+  assert.equal(runs[0].blocks.length, blocks.length)
 })
